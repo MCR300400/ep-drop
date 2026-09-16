@@ -93,11 +93,15 @@ function connettiWebSocket() {
       }
     }
 
-    socket.onclose = () => {
+    socket.onclose = (event) => {
       statoConnessione.value = 'disconnesso'
+      if (event && (event.code === 4404 || event.code === 4004 || stanzaInesistente.value)) {
+        stanzaInesistente.value = true
+        return
+      }
       // Riconnessione automatica dopo 3 secondi
       setTimeout(() => {
-        if (statoConnessione.value === 'disconnesso') {
+        if (statoConnessione.value === 'disconnesso' && !stanzaInesistente.value) {
           connettiWebSocket()
         }
       }, 3000)
@@ -118,7 +122,13 @@ function inviaMessaggio(dati) {
 }
 
 function gestisciMessaggio(msg) {
-  switch (msg.tipo) {
+  switch (msg.tipo || msg.type) {
+    case 'room-not-found':
+      stanzaInesistente.value = true
+      statoConnessione.value = 'disconnesso'
+      if (ws.value) ws.value.close(4404)
+      break
+
     case 'peer-join':
       // Se un nuovo peer entra, gli rispondiamo con la nostra presenza
       if (msg.peerId !== peerId) {
@@ -356,7 +366,43 @@ function formattaDimensione(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
 }
 
-onMounted(() => {
+async function creaNuovaStanza() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  let part1 = ''
+  let part2 = ''
+  for (let i = 0; i < 3; i++) part1 += chars.charAt(Math.floor(Math.random() * chars.length))
+  for (let i = 0; i < 3; i++) part2 += chars.charAt(Math.floor(Math.random() * chars.length))
+  const newCode = `${part1}-${part2}`
+  const apiBase = WS_BASE.replace(/^ws(s)?:/, 'http$1:')
+  try {
+    await fetch(`${apiBase}/api/rooms`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ app: 'drop', room: newCode })
+    })
+  } catch (err) {
+    console.error('Errore creazione stanza:', err)
+  }
+  window.location.href = `/room/${newCode}`
+}
+
+onMounted(async () => {
+  const apiBase = WS_BASE.replace(/^ws(s)?:/, 'http$1:')
+  try {
+    const res = await fetch(`${apiBase}/api/rooms/check?app=drop&room=${encodeURIComponent(codiceStanza.value)}`)
+    if (res.ok) {
+      const data = await res.json()
+      if (!data.exists) {
+        stanzaInesistente.value = true
+        statoConnessione.value = 'disconnesso'
+        verificaInCorso.value = false
+        return
+      }
+    }
+  } catch (err) {
+    console.warn('Verifica stanza via HTTP fallita:', err)
+  }
+  verificaInCorso.value = false
   connettiWebSocket()
 })
 
