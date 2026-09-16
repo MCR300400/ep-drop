@@ -416,12 +416,34 @@ onUnmounted(() => {
 
 <template>
   <div class="pagina-stanza">
-    <!-- Testata Stanza & Azioni Rapide -->
-    <div class="testata-stanza">
-      <div class="info-stanza-sinistra">
-        <button type="button" class="btn-ritorno" @click="router.push('/')">
-          &larr; Esci
-        </button>
+    <!-- Schermata Stanza Inesistente -->
+    <div v-if="stanzaInesistente" class="card-errore-stanza">
+      <div class="box-errore-centrato">
+        <div class="icona-avviso">⚠️</div>
+        <h2 class="titolo-avviso">Stanza non trovata</h2>
+        <p class="desc-avviso">
+          La stanza <code>{{ codiceStanza }}</code> non esiste o è scaduta.<br />
+          Per accedere a una stanza condivisa è necessario che sia stata precedentemente creata.
+        </p>
+        <div class="bottoni-avviso">
+          <button type="button" class="btn-secondario-avviso" @click="router.push('/')">
+            Torna alla Home
+          </button>
+          <button type="button" class="btn-primario-avviso" @click="creaNuovaStanza">
+            Crea Nuova Stanza
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenuto Stanza Normale -->
+    <template v-else>
+      <!-- Testata Stanza & Azioni Rapide -->
+      <div class="testata-stanza">
+        <div class="info-stanza-sinistra">
+          <button type="button" class="btn-ritorno" @click="router.push('/')">
+            &larr; Esci
+          </button>
         <div class="badge-codice-stanza">
           <span class="label-stanza">STANZA:</span>
           <span class="valore-stanza">{{ codiceStanza }}</span>
@@ -638,6 +660,7 @@ onUnmounted(() => {
       :codice-stanza="codiceStanza"
       @chiudi="mostraQRCode = false"
     />
+    </template>
   </div>
 </template>
 
@@ -1183,5 +1206,94 @@ onUnmounted(() => {
   .griglia-scambio {
     grid-template-columns: 1fr;
   }
+}
+
+/* Card Errore Stanza Inesistente */
+.card-errore-stanza {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 55vh;
+  padding: 2rem 1rem;
+}
+
+.box-errore-centrato {
+  background: var(--bg-superficie);
+  border: 1px solid var(--bordo-medio);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--ombra-scheda);
+}
+
+.icona-avviso {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.titolo-avviso {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--testo-primario);
+  margin-bottom: 0.75rem;
+}
+
+.desc-avviso {
+  font-size: 0.95rem;
+  color: var(--testo-secondario);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.desc-avviso code {
+  font-family: ui-monospace, monospace;
+  background: var(--bg-superficie-elevata);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  color: var(--accento);
+  font-weight: 700;
+}
+
+.bottoni-avviso {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-secondario-avviso {
+  background: var(--bg-superficie-elevata);
+  border: 1px solid var(--bordo-medio);
+  color: var(--testo-primario);
+  padding: 0.75rem 1.4rem;
+  border-radius: 8px;
+  font-weight: 650;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-secondario-avviso:hover {
+  border-color: var(--accento-bordo);
+  color: var(--accento);
+}
+
+.btn-primario-avviso {
+  background: var(--accento);
+  border: none;
+  color: #fff;
+  padding: 0.75rem 1.4rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-primario-avviso:hover {
+  background: var(--accento-hover);
 }
 </style>
