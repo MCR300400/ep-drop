@@ -23,6 +23,8 @@ const tipoDispositivo = ref(rilevaIconaDispositivo())
 const ws = ref(null)
 const statoConnessione = ref('connessione') // connessione, connesso, disconnesso
 const peersConnessi = ref([])
+const stanzaInesistente = ref(false)
+const verificaInCorso = ref(true)
 
 // Live Clipboard
 const testoClipboard = ref('')

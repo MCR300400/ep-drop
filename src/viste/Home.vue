@@ -6,6 +6,11 @@ import Contatore from '../components/Contatore.vue'
 const router = useRouter()
 const codiceInserito = ref('')
 const erroreCodice = ref('')
+const staCreando = ref(false)
+const staVerificando = ref(false)
+
+const WS_BASE = import.meta.env.VITE_WS_URL || 'wss://ep-ws.edoardopippi00.workers.dev'
+const API_BASE = WS_BASE.replace(/^ws(s)?:/, 'http$1:')
 
 function generaCodiceStanza() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -16,19 +21,50 @@ function generaCodiceStanza() {
   return `${part1}-${part2}`
 }
 
-function creaNuovaStanza() {
+async function creaNuovaStanza() {
+  if (staCreando.value) return
+  staCreando.value = true
   const code = generaCodiceStanza()
-  router.push(`/room/${code}`)
+  try {
+    await fetch(`${API_BASE}/api/rooms`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ app: 'drop', room: code })
+    })
+  } catch (err) {
+    console.error('Errore creazione stanza:', err)
+  } finally {
+    staCreando.value = false
+    router.push(`/room/${code}`)
+  }
 }
 
-function entraInStanza() {
+async function entraInStanza() {
   const pulito = codiceInserito.value.trim().toUpperCase().replace(/\s+/g, '')
   if (!pulito || pulito.length < 3) {
     erroreCodice.value = 'Inserisci un codice stanza valido (es. K9X-2M)'
     return
   }
   erroreCodice.value = ''
-  router.push(`/room/${pulito}`)
+  staVerificando.value = true
+
+  try {
+    const res = await fetch(`${API_BASE}/api/rooms/check?app=drop&room=${encodeURIComponent(pulito)}`)
+    if (!res.ok) {
+      erroreCodice.value = 'Impossibile verificare la stanza. Riprova.'
+      return
+    }
+    const data = await res.json()
+    if (!data.exists) {
+      erroreCodice.value = 'Stanza non trovata. Controlla il codice inserito o creane una nuova.'
+      return
+    }
+    router.push(`/room/${pulito}`)
+  } catch (err) {
+    erroreCodice.value = 'Errore di connessione al server delle stanze.'
+  } finally {
+    staVerificando.value = false
+  }
 }
 </script>
 
@@ -55,12 +91,12 @@ function entraInStanza() {
       <!-- Azioni Rapide Stanza -->
       <div class="scheda-azione-stanza">
         <div class="blocco-crea">
-          <button type="button" class="btn-primario" @click="creaNuovaStanza">
+          <button type="button" class="btn-primario" :disabled="staCreando" @click="creaNuovaStanza">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
-            Crea Nuova Stanza Istantanea
+            {{ staCreando ? 'Creazione in corso...' : 'Crea Nuova Stanza Istantanea' }}
           </button>
           <span class="nota-crea">Genera una stanza temporanea protetta</span>
         </div>
@@ -77,9 +113,10 @@ function entraInStanza() {
               placeholder="Es. K9X-2M"
               maxlength="12"
               class="input-codice"
+              :disabled="staVerificando"
             />
-            <button type="submit" class="btn-secondario">
-              Entra
+            <button type="submit" class="btn-secondario" :disabled="staVerificando">
+              {{ staVerificando ? 'Verifica...' : 'Entra' }}
             </button>
           </div>
           <span v-if="erroreCodice" class="testo-errore">{{ erroreCodice }}</span>
