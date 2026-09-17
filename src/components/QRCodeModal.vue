@@ -1,5 +1,8 @@
 <script setup>
 import { computed } from 'vue'
+import { useLingua } from '../composables/useLingua'
+
+const { isItalian, t } = useLingua()
 
 const props = defineProps({
   mostra: {
@@ -28,16 +31,16 @@ const qrImageUrl = computed(() => {
   <div v-if="mostra" class="modal-overlay" @click.self="emit('chiudi')">
     <div class="modal-card">
       <div class="modal-top">
-        <h3>Inquadra con la Fotocamera</h3>
-        <button type="button" class="btn-chiudi" @click="emit('chiudi')">&times;</button>
+        <h3>{{ t('qr.titolo') }}</h3>
+        <button type="button" class="btn-chiudi" :aria-label="isItalian ? 'Chiudi' : 'Close'" @click="emit('chiudi')">&times;</button>
       </div>
 
       <p class="modal-istruzioni">
-        Scansiona questo codice con il tuo smartphone o tablet per entrare istantaneamente nella stanza <strong>{{ codiceStanza }}</strong>.
+        {{ t('qr.istruzioni') }} <strong>{{ codiceStanza }}</strong>.
       </p>
 
       <div class="qr-box">
-        <img :src="qrImageUrl" alt="QR Code di accesso alla stanza" class="qr-img" width="220" height="220" />
+        <img :src="qrImageUrl" :alt="isItalian ? 'QR Code di accesso alla stanza' : 'Room access QR code'" class="qr-img" width="220" height="220" />
       </div>
 
       <div class="url-condivisione">

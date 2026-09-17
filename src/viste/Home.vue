@@ -2,7 +2,9 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Contatore from '../components/Contatore.vue'
+import { useLingua } from '../composables/useLingua'
 
+const { isItalian, t } = useLingua()
 const router = useRouter()
 const codiceInserito = ref('')
 const erroreCodice = ref('')
@@ -42,7 +44,9 @@ async function creaNuovaStanza() {
 async function entraInStanza() {
   const pulito = codiceInserito.value.trim().toUpperCase().replace(/\s+/g, '')
   if (!pulito || pulito.length < 3) {
-    erroreCodice.value = 'Inserisci un codice stanza valido (es. K9X-2M)'
+    erroreCodice.value = isItalian.value
+      ? 'Inserisci un codice stanza valido (es. K9X-2M)'
+      : 'Enter a valid room code (e.g. K9X-2M)'
     return
   }
   erroreCodice.value = ''
@@ -51,17 +55,23 @@ async function entraInStanza() {
   try {
     const res = await fetch(`${API_BASE}/api/rooms/check?app=drop&room=${encodeURIComponent(pulito)}`)
     if (!res.ok) {
-      erroreCodice.value = 'Impossibile verificare la stanza. Riprova.'
+      erroreCodice.value = isItalian.value
+        ? 'Impossibile verificare la stanza. Riprova.'
+        : 'Unable to verify room. Please retry.'
       return
     }
     const data = await res.json()
     if (!data.exists) {
-      erroreCodice.value = 'Stanza non trovata. Controlla il codice inserito o creane una nuova.'
+      erroreCodice.value = isItalian.value
+        ? 'Stanza non trovata. Controlla il codice inserito o creane una nuova.'
+        : 'Room not found. Check the code or create a new room.'
       return
     }
     router.push(`/room/${pulito}`)
   } catch (err) {
-    erroreCodice.value = 'Errore di connessione al server delle stanze.'
+    erroreCodice.value = isItalian.value
+      ? 'Errore di connessione al server delle stanze.'
+      : 'Connection error to room server.'
   } finally {
     staVerificando.value = false
   }
@@ -75,17 +85,17 @@ async function entraInStanza() {
       <div class="testata-hero-badge">
         <div class="badge-tag">
           <span class="dot"></span>
-          WebSockets + WebRTC P2P Transfer
+          {{ t('home.badge') }}
         </div>
         <Contatore />
       </div>
 
       <h1 class="titolo-hero">
-        Condividi file e appunti tra dispositivi all'istante.
+        {{ t('home.titolo') }}
       </h1>
 
       <p class="sottotitolo-hero">
-        Senza registrazione, senza salvare nulla su server esterni. Apri la stessa stanza su laptop e telefono per scambiarti testi, link o trasferire file ad alta velocità direttamente browser-to-browser.
+        {{ t('home.sottotitolo') }}
       </p>
 
       <!-- Azioni Rapide Stanza -->
@@ -96,13 +106,13 @@ async function entraInStanza() {
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
-            {{ staCreando ? 'Creazione in corso...' : 'Crea Nuova Stanza Istantanea' }}
+            {{ staCreando ? t('home.creando') : t('home.crea') }}
           </button>
-          <span class="nota-crea">Genera una stanza temporanea protetta</span>
+          <span class="nota-crea">{{ t('home.notaCrea') }}</span>
         </div>
 
         <div class="divisore-o">
-          <span>oppure</span>
+          <span>{{ t('home.oppure') }}</span>
         </div>
 
         <form class="blocco-unisciti" @submit.prevent="entraInStanza">
@@ -110,41 +120,41 @@ async function entraInStanza() {
             <input
               v-model="codiceInserito"
               type="text"
-              placeholder="Es. K9X-2M"
+              :placeholder="t('home.placeholderCodice')"
               maxlength="12"
               class="input-codice"
               :disabled="staVerificando"
             />
             <button type="submit" class="btn-secondario" :disabled="staVerificando">
-              {{ staVerificando ? 'Verifica...' : 'Entra' }}
+              {{ staVerificando ? t('home.verificando') : t('home.entra') }}
             </button>
           </div>
           <span v-if="erroreCodice" class="testo-errore">{{ erroreCodice }}</span>
-          <span v-else class="nota-crea">Inserisci il codice mostrato sull'altro dispositivo</span>
+          <span v-else class="nota-crea">{{ t('home.notaEntra') }}</span>
         </form>
       </div>
     </section>
 
     <!-- Pilastri / Caratteristiche Chiave -->
     <section id="come-funziona" class="sezione-pilastri">
-      <h2 class="titolo-sezione">Come Funziona ep-drop</h2>
+      <h2 class="titolo-sezione">{{ t('home.sezFunziona') }}</h2>
       <div class="griglia-pilastri">
         <div class="scheda-pilastro">
           <div class="icona-box">⚡</div>
-          <h3>Live Clipboard Sincronizzata</h3>
-          <p>Incolli un codice, un link o un appunto sul telefono e appare istantaneamente sul tuo computer in tempo reale con copia in 1 click.</p>
+          <h3>{{ t('home.f1Titolo') }}</h3>
+          <p>{{ t('home.f1Desc') }}</p>
         </div>
 
         <div class="scheda-pilastro">
           <div class="icona-box">📁</div>
-          <h3>Drag & Drop File Streaming</h3>
-          <p>Trascina documenti, immagini, video o archivi compressi. Il file viene frazionato in chunk crittografati e inviato senza limiti di dimensione artificiali.</p>
+          <h3>{{ t('home.f2Titolo') }}</h3>
+          <p>{{ t('home.f2Desc') }}</p>
         </div>
 
         <div class="scheda-pilastro">
           <div class="icona-box">🔒</div>
-          <h3>Crittografia & Zero Persistence</h3>
-          <p>Nessun file o testo viene salvato su database. Il canale WebRTC è diretto e i pacchetti WebSocket risiedono esclusivamente nella memoria volatile (RAM) durante il passaggio.</p>
+          <h3>{{ t('home.f3Titolo') }}</h3>
+          <p>{{ t('home.f3Desc') }}</p>
         </div>
       </div>
     </section>
@@ -153,10 +163,8 @@ async function entraInStanza() {
     <section id="sicurezza" class="sezione-sicurezza">
       <div class="box-sicurezza">
         <div class="sicurezza-testo">
-          <h3>Architettura Edge & Cloudflare Durable Objects</h3>
-          <p>
-            Il coordinamento delle stanze di <strong>ep-drop</strong> è gestito da un Cloudflare Worker a bassissima latenza che sfrutta <strong>Durable Objects</strong> con WebSockets bidirezionali. Una volta scambiata la segnalazione, il trasferimento dei dati avviene preferibilmente via WebRTC DataChannel p2p per garantire il massimo throughput.
-          </p>
+          <h3>{{ t('home.secTitolo') }}</h3>
+          <p v-html="t('home.secDesc')"></p>
         </div>
       </div>
     </section>

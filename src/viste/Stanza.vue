@@ -2,6 +2,9 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import QRCodeModal from '../components/QRCodeModal.vue'
+import { useLingua } from '../composables/useLingua'
+
+const { isItalian, t } = useLingua()
 
 const route = useRoute()
 const router = useRouter()
@@ -420,17 +423,23 @@ onUnmounted(() => {
     <div v-if="stanzaInesistente" class="card-errore-stanza">
       <div class="box-errore-centrato">
         <div class="icona-avviso">⚠️</div>
-        <h2 class="titolo-avviso">Stanza non trovata</h2>
+        <h2 class="titolo-avviso">{{ isItalian ? 'Stanza non trovata' : 'Room not found' }}</h2>
         <p class="desc-avviso">
-          La stanza <code>{{ codiceStanza }}</code> non esiste o è scaduta.<br />
-          Per accedere a una stanza condivisa è necessario che sia stata precedentemente creata.
+          {{ isItalian
+            ? `La stanza ${codiceStanza} non esiste o è scaduta.`
+            : `Room ${codiceStanza} does not exist or has expired.`
+          }}<br />
+          {{ isItalian
+            ? 'Per accedere a una stanza condivisa è necessario che sia stata precedentemente creata.'
+            : 'To access a room, it must be created first on one of your devices.'
+          }}
         </p>
         <div class="bottoni-avviso">
           <button type="button" class="btn-secondario-avviso" @click="router.push('/')">
-            Torna alla Home
+            {{ isItalian ? 'Torna alla Home' : 'Back to Home' }}
           </button>
           <button type="button" class="btn-primario-avviso" @click="creaNuovaStanza">
-            Crea Nuova Stanza
+            {{ isItalian ? 'Crea Nuova Stanza' : 'Create New Room' }}
           </button>
         </div>
       </div>
@@ -442,21 +451,28 @@ onUnmounted(() => {
       <div class="testata-stanza">
         <div class="info-stanza-sinistra">
           <button type="button" class="btn-ritorno" @click="router.push('/')">
-            &larr; Esci
+            &larr; {{ isItalian ? 'Esci' : 'Leave' }}
           </button>
         <div class="badge-codice-stanza">
-          <span class="label-stanza">STANZA:</span>
+          <span class="label-stanza">{{ isItalian ? 'STANZA:' : 'ROOM:' }}</span>
           <span class="valore-stanza">{{ codiceStanza }}</span>
         </div>
         <div class="stato-dot-connessione" :class="statoConnessione" :title="`Stato: ${statoConnessione}`">
           <span class="dot-ws"></span>
-          <span class="testo-ws">{{ statoConnessione }}</span>
+          <span class="testo-ws">
+            {{ statoConnessione === 'connesso'
+              ? (isItalian ? 'connesso' : 'connected')
+              : (statoConnessione === 'connessione'
+                  ? (isItalian ? 'connessione...' : 'connecting...')
+                  : (isItalian ? 'disconnesso' : 'disconnected'))
+            }}
+          </span>
         </div>
       </div>
 
       <div class="info-stanza-destra">
         <button type="button" class="btn-stanza-azione" @click="copiaLinkStanza">
-          {{ linkCopiato ? 'Link Copiato! ✓' : 'Copia Link Stanza' }}
+          {{ linkCopiato ? (isItalian ? 'Link Copiato! ✓' : 'Link Copied! ✓') : (isItalian ? 'Copia Link Stanza' : 'Copy Room Link') }}
         </button>
         <button type="button" class="btn-stanza-azione btn-qr" @click="mostraQRCode = true">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -465,7 +481,7 @@ onUnmounted(() => {
             <rect x="14" y="14" width="7" height="7"></rect>
             <rect x="3" y="14" width="7" height="7"></rect>
           </svg>
-          QR Code Smartphone
+          {{ isItalian ? 'QR Code Smartphone' : 'Smartphone QR Code' }}
         </button>
       </div>
     </div>
@@ -474,19 +490,23 @@ onUnmounted(() => {
     <section class="sezione-radar">
       <div class="radar-box">
         <div class="radar-header">
-          <span class="radar-titolo">Dispositivi Connessi in Stanza ({{ peersConnessi.length + 1 }})</span>
-          <span class="radar-sub">Condivisione attiva in tempo reale</span>
+          <span class="radar-titolo">
+            {{ isItalian ? 'Dispositivi Connessi in Stanza' : 'Connected Devices in Room' }} ({{ peersConnessi.length + 1 }})
+          </span>
+          <span class="radar-sub">
+            {{ isItalian ? 'Condivisione attiva in tempo reale' : 'Live real-time sharing' }}
+          </span>
         </div>
 
         <div class="radar-dispositivi-grid">
           <!-- Dispositivo Corrente -->
           <div class="scheda-dispositivo me">
             <div class="icona-device-box">
-              <span class="device-badge">Tu</span>
+              <span class="device-badge">{{ isItalian ? 'Tu' : 'You' }}</span>
               💻
             </div>
             <span class="nome-device">{{ nomeDispositivo }}</span>
-            <span class="ip-device">Dispositivo locale</span>
+            <span class="ip-device">{{ isItalian ? 'Dispositivo locale' : 'Local device' }}</span>
           </div>
 
           <!-- Altri Peer nella Stanza -->
@@ -500,14 +520,19 @@ onUnmounted(() => {
               📱
             </div>
             <span class="nome-device">{{ peer.nome }}</span>
-            <span class="ip-device">Pronto per lo scambio</span>
+            <span class="ip-device">{{ isItalian ? 'Pronto per lo scambio' : 'Ready to exchange' }}</span>
           </div>
 
           <!-- Placeholder se nessun altro peer è connesso -->
           <div v-if="peersConnessi.length === 0" class="scheda-attesa">
             <div class="animazione-radar-onda"></div>
-            <p>In attesa di un altro dispositivo...</p>
-            <span class="nota-attesa">Apri questo link o inquadra il QR Code dal telefono</span>
+            <p>{{ isItalian ? 'In attesa di un altro dispositivo...' : 'Waiting for another device...' }}</p>
+            <span class="nota-attesa">
+              {{ isItalian
+                ? 'Apri questo link o inquadra il QR Code dal telefono'
+                : 'Open this link or scan the QR Code on your phone'
+              }}
+            </span>
           </div>
         </div>
       </div>
@@ -521,7 +546,7 @@ onUnmounted(() => {
           <div class="pannello-top">
             <div class="titolo-pannello-box">
               <span class="icona-sez">📋</span>
-              <h3>Live Clipboard Istantanea</h3>
+              <h3>{{ isItalian ? 'Live Clipboard Istantanea' : 'Instant Live Clipboard' }}</h3>
             </div>
             <button
               v-if="testoClipboard"
@@ -529,31 +554,36 @@ onUnmounted(() => {
               class="btn-copia-clip"
               @click="copiaNegliAppunti(testoClipboard)"
             >
-              {{ copiatoSuccesso ? 'Copiato! ✓' : 'Copia Testo' }}
+              {{ copiatoSuccesso ? (isItalian ? 'Copiato! ✓' : 'Copied! ✓') : (isItalian ? 'Copia Testo' : 'Copy Text') }}
             </button>
           </div>
 
           <p class="desc-pannello">
-            Incolla testo, link, credenziali temporanee o snippet di codice. Si sincronizza in tempo reale con tutti i dispositivi nella stanza.
+            {{ isItalian
+              ? 'Incolla testo, link, credenziali temporanee o snippet di codice. Si sincronizza in tempo reale con tutti i dispositivi nella stanza.'
+              : 'Paste text, links, temporary credentials, or code snippets. Syncs in real-time across all devices in this room.'
+            }}
           </p>
 
           <textarea
             v-model="testoClipboard"
-            placeholder="Scrivi o incolla qui il testo da inviare all'altro dispositivo..."
+            :placeholder="isItalian
+              ? 'Scrivi o incolla qui il testo da inviare all\'altro dispositivo...'
+              : 'Type or paste text to share with your other devices...'"
             class="textarea-clipboard"
             rows="7"
             @input="sincronizzaAppunti"
           ></textarea>
 
           <div class="footer-clipboard">
-            <span class="conteggio-char">{{ testoClipboard.length }} caratteri</span>
+            <span class="conteggio-char">{{ testoClipboard.length }} {{ isItalian ? 'caratteri' : 'characters' }}</span>
             <button type="button" class="btn-invia-manuale" @click="sincronizzaAppunti">
-              Invia & Sincronizza &rarr;
+              {{ isItalian ? 'Invia & Sincronizza →' : 'Send & Sync →' }}
             </button>
           </div>
 
           <div v-if="ultimoTestoRicevuto" class="banner-ricevuto">
-            <span class="badge-mittente">Ricevuto da {{ autoreUltimoTesto }}</span>
+            <span class="badge-mittente">{{ isItalian ? 'Ricevuto da' : 'Received from' }} {{ autoreUltimoTesto }}</span>
             <p class="testo-preview">{{ ultimoTestoRicevuto }}</p>
           </div>
         </div>
@@ -565,12 +595,15 @@ onUnmounted(() => {
           <div class="pannello-top">
             <div class="titolo-pannello-box">
               <span class="icona-sez">📁</span>
-              <h3>Trasferimento File P2P</h3>
+              <h3>{{ isItalian ? 'Trasferimento File P2P' : 'P2P File Transfer' }}</h3>
             </div>
           </div>
 
           <p class="desc-pannello">
-            Trascina qualsiasi file qui dentro oppure sfoglia dal tuo dispositivo per avviare il trasferimento streaming diretto.
+            {{ isItalian
+              ? 'Trascina qualsiasi file qui dentro oppure sfoglia dal tuo dispositivo per avviare il trasferimento streaming diretto.'
+              : 'Drag any file here or browse from your device to start direct streaming transfer.'
+            }}
           </p>
 
           <!-- Zona Drag & Drop -->
@@ -594,15 +627,19 @@ onUnmounted(() => {
                 <polyline points="17 8 12 3 7 8"></polyline>
                 <line x1="12" y1="3" x2="12" y2="15"></line>
               </svg>
-              <span class="testo-drop-primario">Trascina i file qui dentro</span>
-              <span class="testo-drop-secondario">oppure <strong class="link-sfoglia">sfoglia dal dispositivo</strong></span>
+              <span class="testo-drop-primario">
+                {{ isItalian ? 'Trascina i file qui dentro' : 'Drag & drop files here' }}
+              </span>
+              <span class="testo-drop-secondario">
+                {{ isItalian ? 'oppure' : 'or' }} <strong class="link-sfoglia">{{ isItalian ? 'sfoglia dal dispositivo' : 'browse files' }}</strong>
+              </span>
             </label>
           </div>
 
           <!-- Barra di Progresso Invio -->
           <div v-if="fileInInvio" class="progresso-box invio">
             <div class="progresso-info">
-              <span class="nome-fl">Invio: {{ fileInInvio.nome }}</span>
+              <span class="nome-fl">{{ isItalian ? 'Invio:' : 'Sending:' }} {{ fileInInvio.nome }}</span>
               <span class="perc-fl">{{ progressoInvio }}%</span>
             </div>
             <div class="traccia-prog">
@@ -613,7 +650,7 @@ onUnmounted(() => {
           <!-- Barra di Progresso Ricezione -->
           <div v-if="fileInRicezione" class="progresso-box ricezione">
             <div class="progresso-info">
-              <span class="nome-fl">Ricezione: {{ fileInRicezione.nome }} ({{ formattaDimensione(fileInRicezione.dimensione) }})</span>
+              <span class="nome-fl">{{ isItalian ? 'Ricezione:' : 'Receiving:' }} {{ fileInRicezione.nome }} ({{ formattaDimensione(fileInRicezione.dimensione) }})</span>
               <span class="perc-fl">{{ progressoRicezione }}%</span>
             </div>
             <div class="traccia-prog">
@@ -623,7 +660,9 @@ onUnmounted(() => {
 
           <!-- Cronologia File Trasferiti nella Sessione -->
           <div v-if="fileCompletati.length > 0" class="cronologia-file">
-            <span class="titolo-crono">File Trasferiti ({{ fileCompletati.length }})</span>
+            <span class="titolo-crono">
+              {{ isItalian ? 'File Trasferiti' : 'Transferred Files' }} ({{ fileCompletati.length }})
+            </span>
             <div class="lista-crono">
               <div
                 v-for="item in fileCompletati"
@@ -644,7 +683,7 @@ onUnmounted(() => {
                   class="btn-scarica-crono"
                   @click="scaricaFile(item.url, item.nome)"
                 >
-                  Scarica
+                  {{ isItalian ? 'Scarica' : 'Download' }}
                 </button>
               </div>
             </div>
