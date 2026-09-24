@@ -135,24 +135,24 @@ async function entraInStanza() {
       </div>
     </section>
 
-    <!-- Pilastri / Caratteristiche Chiave -->
+    <!-- Pilastri / Caratteristiche Chiave (Aperte, ZERO card) -->
     <section id="come-funziona" class="sezione-pilastri">
       <h2 class="titolo-sezione">{{ t('home.sezFunziona') }}</h2>
       <div class="griglia-pilastri">
-        <div class="scheda-pilastro">
-          <div class="icona-box">⚡</div>
+        <div class="riga-pilastro">
+          <span class="indice-pilastro">01</span>
           <h3>{{ t('home.f1Titolo') }}</h3>
           <p>{{ t('home.f1Desc') }}</p>
         </div>
 
-        <div class="scheda-pilastro">
-          <div class="icona-box">📁</div>
+        <div class="riga-pilastro">
+          <span class="indice-pilastro">02</span>
           <h3>{{ t('home.f2Titolo') }}</h3>
           <p>{{ t('home.f2Desc') }}</p>
         </div>
 
-        <div class="scheda-pilastro">
-          <div class="icona-box">🔒</div>
+        <div class="riga-pilastro">
+          <span class="indice-pilastro">03</span>
           <h3>{{ t('home.f3Titolo') }}</h3>
           <p>{{ t('home.f3Desc') }}</p>
         </div>
@@ -228,13 +228,12 @@ async function entraInStanza() {
   max-width: 740px;
 }
 
-/* Scheda Azione Stanza */
+/* Scheda Azione Stanza (Aperta, no ombre SaaS) */
 .scheda-azione-stanza {
   background: var(--bg-superficie);
   border: 1px solid var(--bordo-medio);
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: var(--ombra-scheda);
+  border-radius: 8px;
+  padding: 1.75rem 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -257,19 +256,18 @@ async function entraInStanza() {
   gap: 0.6rem;
   background: var(--accento);
   color: #ffffff;
-  border: none;
+  border: 1px solid var(--accento);
   padding: 0.85rem 1.4rem;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 0.98rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.18s ease;
-  box-shadow: 0 4px 14px var(--accento-sfondo-forte);
+  transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .btn-primario:hover {
   background: var(--accento-hover);
-  transform: translateY(-1px);
+  border-color: var(--accento-hover);
 }
 
 .nota-crea {
@@ -352,38 +350,37 @@ async function entraInStanza() {
 .griglia-pilastri {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
+  gap: 2.5rem 2rem;
 }
 
-.scheda-pilastro {
-  background: var(--bg-superficie);
-  border: 1px solid var(--bordo-sottile);
-  border-radius: 12px;
-  padding: 1.5rem;
-  transition: all 0.2s ease;
+.riga-pilastro {
+  display: flex;
+  flex-direction: column;
+  border-top: 2px solid var(--bordo-medio);
+  padding-top: 1.25rem;
 }
 
-.scheda-pilastro:hover {
-  border-color: var(--bordo-medio);
-  transform: translateY(-2px);
+.indice-pilastro {
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+  font-weight: 750;
+  color: var(--accento);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.65rem;
 }
 
-.icona-box {
-  font-size: 1.6rem;
-  margin-bottom: 0.85rem;
-}
-
-.scheda-pilastro h3 {
-  font-size: 1.1rem;
+.riga-pilastro h3 {
+  font-size: 1.18rem;
   font-weight: 750;
   color: var(--testo-primario);
-  margin-bottom: 0.5rem;
+  letter-spacing: -0.015em;
+  margin-bottom: 0.45rem;
 }
 
-.scheda-pilastro p {
-  font-size: 0.92rem;
+.riga-pilastro p {
+  font-size: 0.95rem;
   color: var(--testo-secondario);
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
 /* Sicurezza */
