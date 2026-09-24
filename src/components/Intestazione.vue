@@ -283,9 +283,13 @@ onUnmounted(() => {
   z-index: 50;
   background: var(--header-bg);
   border-bottom: 1px solid var(--bordo-sottile);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  transition: background-color 0.25s ease, border-color 0.25s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .header-interno {

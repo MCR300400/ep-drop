@@ -27,6 +27,10 @@ import Intestazione from './components/Intestazione.vue'
 
 <style>
 /* Reset & stili globali */
+html {
+  scroll-behavior: smooth;
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -39,8 +43,14 @@ body {
   color: var(--testo-primario);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  transition: background-color 0.25s ease, color 0.2s ease;
+  text-rendering: optimizeSpeed;
+  overflow-x: clip;
+  -webkit-overflow-scrolling: touch;
+}
+
+button, a {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .contenitore {

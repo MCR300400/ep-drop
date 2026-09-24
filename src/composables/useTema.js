@@ -18,6 +18,10 @@ export function useTema() {
     tema.value = nuovoTema
     if (typeof document !== 'undefined') {
       document.documentElement.setAttribute('data-theme', nuovoTema)
+      const metaTheme = document.getElementById('theme-color-meta') || document.querySelector('meta[name="theme-color"]')
+      if (metaTheme) {
+        metaTheme.setAttribute('content', nuovoTema === 'light' ? '#fbfaf8' : '#121316')
+      }
       try {
         localStorage.setItem(TEMA_KEY, nuovoTema)
       } catch (e) {}
