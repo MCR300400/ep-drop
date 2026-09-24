@@ -3,15 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>ep-drop — Condivisione File & Appunti Istantanea P2P</title>
     <meta name="description" content="Condividi file e sincronizza appunti tra i tuoi dispositivi istantaneamente via WebSocket e WebRTC senza registrazione né server di archiviazione." />
+    <meta name="theme-color" content="#121316" id="theme-color-meta" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <script>
       (function () {
         try {
           var salvato = localStorage.getItem('ep_tema');
           var tema = (salvato === 'light' || salvato === 'dark') ? salvato : 'dark';
           document.documentElement.setAttribute('data-theme', tema);
+          var metaTheme = document.getElementById('theme-color-meta');
+          if (metaTheme) {
+            metaTheme.setAttribute('content', tema === 'light' ? '#fbfaf8' : '#121316');
+          }
         } catch (e) {
           document.documentElement.setAttribute('data-theme', 'dark');
         }
